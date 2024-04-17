@@ -1,50 +1,32 @@
 import { useState } from 'react'
+import { useEffect } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const[todoForToday, setTodoForToday] = useState({
+    title: "buy ps5",
+    description: "but ps5 on amazon",
+    id:1
+  })
 
-  // let [a,setA] = useState(10);
-
-  // setInterval(()=>{
-  //  setA(a+1)
-  // },3000)
-
-  
+  setInterval(() => {
+    setTodoForToday({
+      title:"buy ps5 updated" + Math.random(),
+      description:"buy ps5 on amazon updated" + Math.random(),
+      id:1
+    })
+  }, 5000);
   return (
-
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-      <HelloWorldComponent></HelloWorldComponent>
-    </>
+   <div>
+    {todoForToday.title}
+    <br />
+    {todoForToday.description}
+   </div>
   )
 }
 
-function HelloWorldComponent(){
-  return(
-    <div>Hello World</div>
-  )
-}
+
 
 export default App
