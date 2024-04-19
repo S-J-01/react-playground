@@ -1,43 +1,42 @@
 import { useState } from 'react'
 import { useEffect } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 
 function App() {
-  const[todos, setTodos] = useState([{
-    title: "buy ps5",
-    description: "but ps5 on amazon",
-    id:1
-  },
-  {
-    title: "buy pepsi",
-    description: "but pepsi on amazon",
-    id:1
-  }])
+  const[todos, setTodos] = useState([])
 
-  // setInterval(() => {
-  //   setTodoForToday({
-  //     title:"buy ps5 updated" + Math.random(),
-  //     description:"buy ps5 on amazon updated" + Math.random(),
-  //     id:1
-  //   })
-  // }, 5000);
+  useEffect(()=>{
+   fetch('http://localhost:3000/todos', {
+    method:'GET'
+   }).then((resp)=>{
+    return resp.json()
+   }).then((data)=>{
+    console.log(data)
+    setTodos(data)
+   })
+  }, [])
+  
   return (
    <div>
-    {todos.map((item)=>{
-      return(<Todo title={item.title} description={item.description}></Todo>)
-    })}
+    {todos.map((todo)=>{
+      return(
+        <Todo title={todo.title} description={todo.description}></Todo>
+      )
+      })}
    </div>
   )
 }
 
-function Todo(props){
-  return (<div>
-    {props.title} &nbsp;
-    {props.description}
-  </div>)
-}
 
+function Todo(props){
+  return(
+  <div>
+    {props.title}
+    &nbsp;
+    {props.description}
+    <br />
+  </div>
+  )
+}
 
 export default App
