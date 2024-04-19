@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { useEffect } from 'react'
 import './App.css'
 
-function App() {
+function useTodos(){
+
   const[todos, setTodos] = useState([])
 
   useEffect(()=>{
@@ -14,7 +15,26 @@ function App() {
     console.log(data)
     setTodos(data)
    })
+
+   setInterval(()=>{
+    fetch('http://localhost:3000/todos', {
+    method:'GET'
+   }).then((resp)=>{
+    return resp.json()
+   }).then((data)=>{
+    console.log(data)
+    setTodos(data)
+   })
+   },1000)
   }, [])
+
+  return todos
+}
+
+function App() {
+  const todos = useTodos()
+
+  
   
   return (
    <div>
