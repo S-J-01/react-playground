@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useMutation } from '@tanstack/react-query'
 import {
   Alert,
   Box,
@@ -21,9 +22,11 @@ function App() {
     email: '',
     password: '',
   })
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const loginMutation = useMutation({ mutationFn: login })
+  const signupMutation = useMutation({ mutationFn: signup })
+
+  const mutation = mode === 'login' ? loginMutation : signupMutation
 
   const handleChange = (event) => {
     const { name, value } = event.target
@@ -40,31 +43,25 @@ function App() {
     }
 
     setMode(nextMode)
-    setError('')
-    setSuccess('')
+    loginMutation.reset()
+    signupMutation.reset()
   }
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = (event) => {
     event.preventDefault()
-    setError('')
-    setSuccess('')
-    setIsSubmitting(true)
 
-    try {
-      const payload =
-        mode === 'signup'
-          ? formData
-          : { email: formData.email, password: formData.password }
+    const payload =
+      mode === 'signup'
+        ? formData
+        : { email: formData.email, password: formData.password }
 
-      const data = mode === 'signup' ? await signup(payload) : await login(payload)
-
-      setSuccess(data.message || `${mode === 'signup' ? 'Signup' : 'Login'} request succeeded.`)
-    } catch (requestError) {
-      setError(requestError.message)
-    } finally {
-      setIsSubmitting(false)
-    }
+    mutation.mutate(payload)
   }
+
+  const successMessage =
+    mutation.isSuccess &&
+    (mutation.data?.message ||
+      `${mode === 'signup' ? 'Signup' : 'Login'} request succeeded.`)
 
   return (
     <Box className="app-shell">
@@ -88,8 +85,10 @@ function App() {
               <Tab value="signup" label="Signup" />
             </Tabs>
 
-            {error ? <Alert severity="error">{error}</Alert> : null}
-            {success ? <Alert severity="success">{success}</Alert> : null}
+            {mutation.isError ? (
+              <Alert severity="error">{mutation.error.message}</Alert>
+            ) : null}
+            {successMessage ? <Alert severity="success">{successMessage}</Alert> : null}
 
             <Box component="form" onSubmit={handleSubmit}>
               <Stack spacing={2.5}>
@@ -124,8 +123,13 @@ function App() {
                   required
                 />
 
-                <Button type="submit" variant="contained" size="large" disabled={isSubmitting}>
-                  {isSubmitting
+                <Button
+                  type="submit"
+                  variant="contained"
+                  size="large"
+                  disabled={mutation.isPending}
+                >
+                  {mutation.isPending
                     ? 'Submitting...'
                     : mode === 'login'
                       ? 'Login'
