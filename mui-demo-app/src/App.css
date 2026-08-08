@@ -8,10 +8,21 @@
     linear-gradient(135deg, #fff6ea 0%, #f6fbff 52%, #e7f0ff 100%);
 }
 
-.auth-card {
+.app-stack {
   width: min(100%, 460px);
+}
+
+.auth-card {
+  width: 100%;
   border-radius: 28px;
   box-shadow: 0 24px 60px rgba(16, 24, 40, 0.14);
+}
+
+.user-card-content {
+  display: flex;
+  justify-content: center;
+  padding-top: 24px;
+  padding-bottom: 24px;
 }
 
 .eyebrow {
