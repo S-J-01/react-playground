@@ -13,7 +13,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { getMe, login, signup } from './api/auth'
+import { getMe, login, logout, signup } from './api/auth'
 import './App.css'
 
 function App() {
@@ -39,6 +39,16 @@ function App() {
   const signupMutation = useMutation({
     mutationFn: signup,
     onSuccess: handleAuthSuccess,
+  })
+
+  const logoutMutation = useMutation({
+    mutationFn: logout,
+    onSuccess: () => {
+      localStorage.removeItem('token')
+      queryClient.removeQueries({ queryKey: ['me'] })
+      loginMutation.reset()
+      signupMutation.reset()
+    },
   })
 
   const mutation = mode === 'login' ? loginMutation : signupMutation
@@ -174,13 +184,30 @@ function App() {
         {user ? (
           <Card className="auth-card">
             <CardContent>
-              <Typography className="eyebrow">Current User</Typography>
-              <Typography variant="h5" className="auth-title">
-                Welcome, {user.name || user.email}
-              </Typography>
-              {user.email ? (
-                <Typography className="auth-copy">{user.email}</Typography>
-              ) : null}
+              <Stack spacing={2}>
+                <Box>
+                  <Typography className="eyebrow">Current User</Typography>
+                  <Typography variant="h5" className="auth-title">
+                    Welcome, {user.name || user.email}
+                  </Typography>
+                  {user.email ? (
+                    <Typography className="auth-copy">{user.email}</Typography>
+                  ) : null}
+                </Box>
+
+                {logoutMutation.isError ? (
+                  <Alert severity="error">{logoutMutation.error.message}</Alert>
+                ) : null}
+
+                <Button
+                  variant="outlined"
+                  color="inherit"
+                  onClick={() => logoutMutation.mutate()}
+                  disabled={logoutMutation.isPending}
+                >
+                  {logoutMutation.isPending ? 'Logging out...' : 'Logout'}
+                </Button>
+              </Stack>
             </CardContent>
           </Card>
         ) : null}
