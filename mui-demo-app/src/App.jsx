@@ -25,10 +25,11 @@ function App() {
     password: '',
   })
 
-  const handleAuthSuccess = (data) => {
+  const handleAuthSuccess = async (data) => {
     if (data.token) {
       localStorage.setItem('token', data.token)
-      queryClient.invalidateQueries({ queryKey: ['me'] })
+      const user = await getMe()
+      queryClient.setQueryData(['me'], user)
     }
   }
 
