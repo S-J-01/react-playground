@@ -44,6 +44,17 @@ function App() {
 
   const logoutMutation = useMutation({
     mutationFn: logout,
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ['me'] })
+      const previousUser = queryClient.getQueryData(['me'])
+      queryClient.setQueryData(['me'], null)
+      return { previousUser }
+    },
+    onError: (_, __, context) => {
+      if (context?.previousUser) {
+        queryClient.setQueryData(['me'], context.previousUser)
+      }
+    },
     onSuccess: () => {
       localStorage.removeItem('token')
       queryClient.removeQueries({ queryKey: ['me'] })
