@@ -74,6 +74,7 @@ function App() {
   const handleChange = (event) => {
     const { name, value } = event.target
 
+    mutation.reset()
     setFormData((current) => ({
       ...current,
       [name]: value,
@@ -90,7 +91,7 @@ function App() {
     signupMutation.reset()
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
 
     const payload =
@@ -98,7 +99,7 @@ function App() {
         ? formData
         : { email: formData.email, password: formData.password }
 
-    mutation.mutate(payload)
+    await mutation.mutateAsync(payload)
   }
 
   const successMessage =
