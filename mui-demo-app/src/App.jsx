@@ -14,6 +14,7 @@ import {
   Typography,
 } from '@mui/material'
 import { getMe, login, logout, signup } from './api/auth'
+import FeedbackForm from './components/FeedbackForm'
 import './App.css'
 
 function App() {
@@ -224,6 +225,8 @@ function App() {
             </CardContent>
           </Card>
         ) : null}
+
+        <FeedbackForm />
       </Stack>
     </Box>
   )
