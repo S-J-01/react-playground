@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Alert,
@@ -20,10 +21,17 @@ import './App.css'
 function App() {
   const queryClient = useQueryClient()
   const [mode, setMode] = useState('login')
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      name: '',
+      email: '',
+      password: '',
+    },
   })
 
   const handleAuthSuccess = async (data) => {
@@ -72,15 +80,13 @@ function App() {
     enabled: !!localStorage.getItem('token'),
   })
 
-  const handleChange = (event) => {
-    const { name, value } = event.target
-
-    mutation.reset()
-    setFormData((current) => ({
-      ...current,
-      [name]: value,
-    }))
-  }
+  const bindField = (field) => ({
+    ...field,
+    onChange: (event) => {
+      mutation.reset()
+      field.onChange(event)
+    },
+  })
 
   const handleModeChange = (_, nextMode) => {
     if (!nextMode) {
@@ -90,15 +96,14 @@ function App() {
     setMode(nextMode)
     loginMutation.reset()
     signupMutation.reset()
+    reset()
   }
 
-  const handleSubmit = async (event) => {
-    event.preventDefault()
-
+  const onSubmit = async (data) => {
     const payload =
       mode === 'signup'
-        ? formData
-        : { email: formData.email, password: formData.password }
+        ? { name: data.name, email: data.email, password: data.password }
+        : { email: data.email, password: data.password }
 
     await mutation.mutateAsync(payload)
   }
@@ -136,37 +141,67 @@ function App() {
               ) : null}
               {successMessage ? <Alert severity="success">{successMessage}</Alert> : null}
 
-              <Box component="form" onSubmit={handleSubmit}>
+              <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
                 <Stack spacing={2.5}>
                   {mode === 'signup' ? (
-                    <TextField
-                      label="Full name"
+                    <Controller
                       name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      fullWidth
-                      required
+                      control={control}
+                      rules={{ required: 'Full name is required' }}
+                      render={({ field }) => (
+                        <TextField
+                          {...bindField(field)}
+                          label="Full name"
+                          fullWidth
+                          error={Boolean(errors.name)}
+                          helperText={errors.name?.message}
+                        />
+                      )}
                     />
                   ) : null}
 
-                  <TextField
-                    label="Email"
+                  <Controller
                     name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    fullWidth
-                    required
+                    control={control}
+                    rules={{
+                      required: 'Email is required',
+                      pattern: {
+                        value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                        message: 'Enter a valid email',
+                      },
+                    }}
+                    render={({ field }) => (
+                      <TextField
+                        {...bindField(field)}
+                        label="Email"
+                        type="email"
+                        fullWidth
+                        error={Boolean(errors.email)}
+                        helperText={errors.email?.message}
+                      />
+                    )}
                   />
 
-                  <TextField
-                    label="Password"
+                  <Controller
                     name="password"
-                    type="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    fullWidth
-                    required
+                    control={control}
+                    rules={{
+                      required: 'Password is required',
+                      minLength: {
+                        value: 6,
+                        message: 'Password must be at least 6 characters',
+                      },
+                    }}
+                    render={({ field }) => (
+                      <TextField
+                        {...bindField(field)}
+                        label="Password"
+                        type="password"
+                        fullWidth
+                        error={Boolean(errors.password)}
+                        helperText={errors.password?.message}
+                      />
+                    )}
                   />
 
                   <Button
